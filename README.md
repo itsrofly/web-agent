@@ -29,8 +29,8 @@ Once the environment is set up, you can use these Makefile commands for quick co
   Or
 - ```bash
   pip install -r requirements.txt
-  tar -xzf geckodriver-v0.36.0-linux64.tar.gz -C build
-  chmod +x build/geckodriver
+  tar -xzf geckodriver-v0.36.0-linux64.tar.gz -C src/build/
+  chmod +x src/build/geckodriver
   ```
 
 ## 🚀 Running the Project
