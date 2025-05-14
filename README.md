@@ -1,9 +1,10 @@
-# Project Title
+# Web Agent
 
 ## 📋 Requirements
 
 - Python 3.12
 - Docker (Optional)
+- Make (Optional)
 
 ## 🔧 Environment Setup
 
@@ -23,10 +24,13 @@ Once the environment is set up, you can use these Makefile commands for quick co
 
 - ```bash
   make setup
+  source env/bin/activate
   ```
   Or
 - ```bash
   pip install -r requirements.txt
+  tar -xzf geckodriver-v0.36.0-linux64.tar.gz -C build
+  chmod +x build/geckodriver
   ```
 
 ## 🚀 Running the Project
