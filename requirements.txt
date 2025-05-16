@@ -2,3 +2,4 @@ nicegui
 selenium
 dotenv
 beautifulsoup4
+openai
