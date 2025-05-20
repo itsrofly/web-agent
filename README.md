@@ -4,7 +4,6 @@
 
 - Python 3.12
 - Docker (Optional)
-- Make (Optional)
 
 ## 🔧 Environment Setup
 
@@ -12,26 +11,14 @@ To run the application, you need to create a `.env` file at the project root. Th
 
 ---
 
-### 📄 Steps to Create and Configure the .env File
+### Steps to Create and Configure the .env File
 
 1. **Create a file named `.env` in the project's root directory.**
 2. **Copy and paste the following template into the `.env` file:**
-   ```
-   env N/A=
+   ```env
+   OPENAI_API_KEY=
    ```
 
-Once the environment is set up, you can use these Makefile commands for quick configuration:
-
-- ```bash
-  make setup
-  source env/bin/activate
-  ```
-  Or
-- ```bash
-  pip install -r requirements.txt
-  tar -xzf geckodriver-v0.36.0-linux64.tar.gz -C src/build/
-  chmod +x src/build/geckodriver
-  ```
 
 ## 🚀 Running the Project
 
@@ -56,5 +43,3 @@ To stop the Docker container:
 - ```bash
     docker compose down
   ```
-
-📚 Enjoy your project! 🌟

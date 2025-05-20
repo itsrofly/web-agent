@@ -1,11 +1,17 @@
 from agent import Agent
 from web import WebDriver
+from dotenv import load_dotenv
+import os
 
+"""
+Load variables from environment and .env file
+"""
+load_dotenv()
 
 def main():
     web = WebDriver()
     try:
-        agent = Agent("http://192.168.1.253:8081/v1/", api_key="lm-studio")
+        agent = Agent(api_key=os.getenv("OPENAI_API_KEY"))
 
         agent.add_tool(web.open_website)
         agent.add_tool(web.execute_action)
@@ -13,11 +19,12 @@ def main():
         agent.add_tool(web.close)
 
         agent_response = agent.send(
-            model="deepseek-r1-distill-llama-70b",
-            prompt="Find the music Identidade by LW on youtube.com and play it. Wait for the video to finish and then tell me when it is done.",
+            model="o4-mini",
+            prompt="Find in Qwik framework doc how to use $server()"
         )
         for response in agent_response:
             print(response, end="")
+        web.close()
     except Exception as e:
         print(f"An error occurred: {e}")
         web.close()

@@ -4,3 +4,4 @@ dotenv
 beautifulsoup4
 openai
 ruff
+loguru

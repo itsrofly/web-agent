@@ -1,5 +1,6 @@
 from typing import Callable, Generator, Literal, List, Dict, get_origin, get_args
 from openai import OpenAI
+from loguru import logger
 import inspect
 import json
 
@@ -7,7 +8,7 @@ import json
 class Agent:
     _tools = {}
 
-    def __init__(self, base_url: str, api_key: str):
+    def __init__(self, api_key: str, base_url: str = 'https://api.openai.com/v1/'):
         """
         Initialize the Agent with the OpenAI API key and base URL.
 
@@ -21,7 +22,13 @@ class Agent:
         model,
         prompt: str,
         think: Literal["/no_think", ""] = "/no_think",
-        system_prompt: str = "",
+        system_prompts: list[str] = ["""
+        You are a web agent designed to operate within web environments by analyzing HTML content and interacting with the page through JavaScript. Use the available functions to:
+        Wait appropriately when loading elements are detected.
+        Perform actions by executing JavaScript as needed.
+        Once you have completed the objective, provide a clear and concise message to the user describing the outcome.
+        Only respond to the user when you have completed the objective.
+        """],
     ) -> Generator:
         """
         Send a prompt to the model and return the response.
@@ -33,18 +40,8 @@ class Agent:
         stream = self.client.chat.completions.create(
             model=model,
             messages=[
-                {
-                    "role": "system",
-                    "content": """
-                    You are a web agent designed to operate within web environments by analyzing HTML content and interacting with the page through JavaScript. Use the available functions to:
-                    Wait appropriately when loading elements are detected.
-                    Perform actions by executing JavaScript as needed.
-                    Once you have completed the objective, provide a clear and concise message to the user describing the outcome and close the WebDriver.
-                    Only respond to the user when you have completed the objective.
-                    """,
-                },
+                *[{"role": "system", "content": message} for message in system_prompts],
                 {"role": "user", "content": think},
-                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt},
             ],
             tools=[
@@ -82,15 +79,15 @@ class Agent:
             tool = self._tools[tool_call.function.name]
             args = json.loads(tool_call.function.arguments)
             result = tool["function"](**args)
-            system_prompt = (
-                f"Tool call: {tool_call.function.name}({args})\nResult: {result}\n"
+            system_prompts.append(
+                f"Latest Tool call Made by You: {tool_call.function.name}({args})\nResult: {result}\n"
             )
-            print(system_prompt)
+            logger.info(f"{tool_call.function.name}({args})\n")
             # Send the result back to the model
             for result in self.send(
                 model=model,
                 prompt=prompt,
-                system_prompt=system_prompt,
+                system_prompts=system_prompts,
             ):
                 yield result
 
