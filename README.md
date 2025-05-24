@@ -3,7 +3,7 @@
 ## 📋 Requirements
 
 - Python 3.12
-- Docker (Optional)
+- Docker
 
 ## 🔧 Environment Setup
 
@@ -19,27 +19,6 @@ To run the application, you need to create a `.env` file at the project root. Th
    OPENAI_API_KEY=
    ```
 
+## 📦 Project Setup
 
 ## 🚀 Running the Project
-
-### With Python
-
-- ```bash
-  python -m ...
-  ```
-
-### With Docker
-
-- ```bash
-  docker compose up --build
-  ```
-
-🔗**Information:**
-
-- Access at: [http://localhost](http://localhost)
-
-To stop the Docker container:
-
-- ```bash
-    docker compose down
-  ```
