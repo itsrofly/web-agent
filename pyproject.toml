@@ -1,0 +1,35 @@
+[project]
+name = "webAgent"
+requires-python = ">= 3.12"
+version = "0.0.1"
+authors = [{ name = "Rofly Antonio", email = "mitangerofly@gmail.com" }]
+description = "Web Assistant"
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+#dependencies =
+
+#-------------------
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["scripts", "data"]
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+ignore = []
+
+
+# pytest options
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--ignore=data"
+log_cli = true
+
+# coverage
+[tool.coverage.run]
+relative_files = true
+omit = [".python_packages/*", "data/*"]
+
+[tool.coverage.report]
+omit = [".python_packages/*", "tests/*", "data/*"]

@@ -44,7 +44,7 @@ To run the application:
 
 1. Start the web driver using Docker Compose:
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 2. Run the Streamlit application in a separate terminal:
