@@ -79,7 +79,7 @@ class WebDriver:
         """
         Execute JavaScript on the page with strict element interaction rules:
         - Use only element IDs to interact with elements (click, fill forms, etc.).
-          Other selectors (classes, tags, attributes) are not allowed.
+          Other selectors (querySelector, classes, tags, attributes, type, etc.) are not allowed.
         - Always target the site’s search bar by its element ID only.
           Do not rely on generic selectors or assumptions.
         - Use defensive code: always check if elements with given IDs exist before interacting,

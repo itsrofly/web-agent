@@ -22,9 +22,9 @@ class Agent:
     def send(
         self,
         model,
-        prompt: str = "",
+        prompt: str = None,
         messages: list[str] = [],
-        think: Literal["/no_think", ""] = "/no_think",
+        think: Literal["/no_think", "/think"] = "/no_think",
         system_prompts: list[str] = [
             """
         You are a web assistant and your job is to perform tasks set by the user on your own, interacting with pages using JavaScript.
@@ -41,18 +41,21 @@ class Agent:
         :param prompt: The prompt to send to the model.
         :return: The response from the model.
         """
+        if prompt:
+            messages.append({"role": "user", "content": prompt})
+
         for i, sprompt in enumerate(system_prompts):
             if i < len(system_prompts) - 1:
                 system_prompts[i] = re.sub(r"%%.*?%%", "...", sprompt)
             else:
                 system_prompts[i] = sprompt
+
         stream = self.client.chat.completions.create(
             model=model,
             messages=[
                 *[{"role": "system", "content": message} for message in system_prompts],
                 {"role": "user", "content": think},
                 *messages,
-                {"role": "user", "content": prompt},
             ],
             tools=[
                 {
@@ -89,12 +92,13 @@ class Agent:
             result = tool["function"](**args)
 
             called = f"Tool Call: {tool_call.function.name}({args})\nResult: %%{result}%%"
-            logger.info(called)
+            logger.info(f"{tool_call.function.name}({args})")
             system_prompts.append(called)
             # Send the result back to the model
             for result in self.send(
                 model=model,
                 prompt=prompt,
+                messages=messages,
                 system_prompts=system_prompts,
             ):
                 yield result
