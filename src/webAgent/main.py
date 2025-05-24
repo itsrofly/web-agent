@@ -15,7 +15,8 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Subscribe me to Deeplearning.AI newsletter, this is my e-mail address: rofly@gmail.com
+# I want to receive news from blog.google, subscribe, my email is rofly@gmail.com
+
 if prompt := st.chat_input("What is up?"):
     with st.spinner("Wait for it...", show_time=True):
         web = WebDriver()
@@ -28,11 +29,7 @@ if prompt := st.chat_input("What is up?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        try:
-            agent_response = agent.send(model="gemini-2.5-flash-preview-05-20", messages=st.session_state.messages)
-        except:
-            agent_response = "Something didn't go right please check the log!"
-            web.close()
+        agent_response = agent.send(model="gemini-2.5-pro-preview-05-06", messages=st.session_state.messages)
         response = st.write_stream(agent_response)
 
     web.close()

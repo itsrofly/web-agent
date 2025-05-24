@@ -29,9 +29,8 @@ class Agent:
             """
         You are a web assistant and your job is to perform tasks set by the user on your own, interacting with pages using JavaScript.
         Cite all sources you find clearly by site name and link.
-        Be objective, factual, and avoid making assumptions.
+        Always check the source information outside the interactive elements, as the action might have already been completed even if the interactive elements are still present.
         """,
-            "... = hidden to save resources.",
         ],
     ) -> Generator:
         """
@@ -70,6 +69,7 @@ class Agent:
                 for name, tool in self._tools.items()
             ],
             tool_choice='auto',
+            temperature=0.5,
             stream=True,
         )
 

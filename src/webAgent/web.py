@@ -3,7 +3,6 @@ from markdownify import markdownify
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
-
 class WebDriver:
     def __init__(self):
         """
@@ -21,26 +20,34 @@ class WebDriver:
         """
         soup = BeautifulSoup(html, "html.parser")
 
-        # Get rid of i, script, image, css, style, script, link
-        for tag in soup.find_all(["style", "script", "link", "svg", "path", "picture", "source", "a"]):
+        # Remove hidden elements
+        for tag in list(soup.find_all(
+            lambda tag: (
+                tag.has_attr("hidden") or
+                tag.get("type", "").lower() == "hidden" or
+                "display:none" in "".join(tag.get("style", "").lower().split()) or
+                "visibility:hidden" in "".join(tag.get("style", "").lower().split())
+            )
+        )):
             tag.decompose()
 
-        # Get all interactive elements
+        # Get all interactive elements in html only
         interactive_elements = soup.find_all(
             lambda tag: (
                 tag.name in ["button", "input", "textarea", "select", "datalist", "area"]
                 or tag.has_attr("contenteditable")
             )
         )
-        # Convert to markdown
-        md = markdownify(html)
-
-        # Insert all interactive elements
         interactive_md = "\n\n## Interactive Elements\n"
         for el in interactive_elements:
-            # Format as a Markdown list item with code block
             interactive_md += f"\n```html\n{el.prettify()}```\n"
+            el.decompose()
+
+        # Convert to markdown
+        md = markdownify(soup.body.prettify())
         result = md + interactive_md
+        print(result)
+        exit(1)
         return result
 
     def __generate_ids(self):
@@ -85,7 +92,7 @@ class WebDriver:
         - Use defensive code: always check if elements with given IDs exist before interacting,
           and handle cases where elements are missing or inaccessible.
 
-        :param script: The JavaScript code to execute.
+        :param script: The JavaScript code to execute. Raw, no escapes or formatting, no break lines. Just clean, ready-to-run JavaScript.
         :return: The Markdown page after executing the script.
         """
         self.driver.execute_script(script)
