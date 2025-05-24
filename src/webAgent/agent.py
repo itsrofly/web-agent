@@ -69,6 +69,7 @@ class Agent:
                 }
                 for name, tool in self._tools.items()
             ],
+            tool_choice='auto',
             stream=True,
         )
 
@@ -83,11 +84,14 @@ class Agent:
                     index = tool_call.index
                     if index not in final_tool_calls:
                         final_tool_calls[index] = tool_call
-                    final_tool_calls[index].function.arguments += tool_call.function.arguments
+                    if final_tool_calls[index].function.arguments != tool_call.function.arguments:
+                        # Prevent duplicate arguments using gemini models
+                        final_tool_calls[index].function.arguments += tool_call.function.arguments
 
         for index, tool_call in final_tool_calls.items():
             # Call the function with the arguments
             tool = self._tools[tool_call.function.name]
+            print(tool_call.function.arguments)
             args = json.loads(tool_call.function.arguments)
             result = tool["function"](**args)
 
