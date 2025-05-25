@@ -18,7 +18,7 @@ To run the application, you need to create a `.env` file at the project root. Th
    ```env
     BASE_URL= # OpenAI API Compatible
     API_KEY=
-    MODEL_NAME=gemini-2.5-pro-preview-05-06
+    MODEL_NAME=gemini-2.5-pro-preview-05-06 # Reasoning Model
    ```
 
 ## 📦 Project Setup

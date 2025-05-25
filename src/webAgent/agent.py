@@ -29,10 +29,11 @@ class Agent:
         You are a web assistant and your job is to perform tasks set by the user on your own, interacting with pages using JavaScript.
         Cite all sources you find clearly by site name and link.
         Always check the source information outside the interactive elements, as the action might have already been completed even if the interactive elements are still present.
+        It is necessary to confirm that the object has actually been carried out successfully by consulting the source page.
         After completing the tasks, close WebDriver and reply to the user
         """,
         ],
-        temperature=0.1,
+        temperature=0,
     ) -> Generator:
         """
         Send a prompt to the model and return the response.
@@ -70,6 +71,7 @@ class Agent:
                 for name, tool in self._tools.items()
             ],
             temperature=temperature,
+            reasoning_effort="high",
             stream=True,
         )
 

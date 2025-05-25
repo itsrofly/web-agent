@@ -144,10 +144,14 @@ class WebDriver:
             The updated source of the page after the
             action and subsequent changes have completed + next_step
         """
-        logger.info(f"🔧 1/2 Action: open_website | Url: {url}")
-        self.driver.get(url)
-        change = self.wait_for_change(f"🔧 2/2 Action: open_website | Next Step: {next_step}")
-        return f"Result: \n{change}, Next Step: {next_step}"
+        logger.info(f"🔧 1/2 Action: open_website | Url: {url}\n")
+        try:
+            self.driver.get(url)
+            change = self.wait_for_change(f"🔧 2/2 Action: open_website | Next Step: {next_step}\n")
+            return f"Result: \n{change}, Next Step: {next_step}"
+        except Exception as e:
+            logger.error(f"🔧 2/2 Action: open_website | Error: {e}\n")
+            return f"Result: Error opening website {url}: {e}"
 
     def click_action(self, element_id: str, next_step: str) -> str:
         """
@@ -162,14 +166,15 @@ class WebDriver:
             action and subsequent changes have completed + next_step
         """
 
-        logger.info(f"🔧 1/2 Action: click_action | Id: {element_id}")
-        element = self.driver.find_element(By.ID, element_id)
-        if not element:
-            return f"Result: Element id {element_id} not found!"
-        element = self.driver.find_element(By.ID, element_id)
-        self.driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", element)
-        change = self.wait_for_change(f"🔧 2/2 Action: click_action | Next Step: {next_step}")
-        return f"Result: \n{change}, Next Step: {next_step}"
+        logger.info(f"🔧 1/2 Action: click_action | Id: {element_id}\n")
+        try:
+            element = self.driver.find_element(By.ID, element_id)
+            self.driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", element)
+            change = self.wait_for_change(f"🔧 2/2 Action: click_action | Next Step: {next_step}\n")
+            return f"Result: \n{change}, Next Step: {next_step}"
+        except Exception as e:
+            logger.error(f"🔧 2/2 Action: click_action | Error: {e}\n")
+            return f"Result: Error clicking element {element_id}: {e}"
 
     def type_action(self, element_id: str, value: str, next_step: str) -> str:
         """
@@ -184,15 +189,17 @@ class WebDriver:
             The updated source of the page after the
             action and subsequent changes have completed + next_step
         """
-        logger.info(f"🔧 1/2 Action: type_action | Id: {element_id} | Value: {value}")
-        element = self.driver.find_element(By.ID, element_id)
-        if not element:
-            return f"Result: Element id {element_id} not found!"
-        self.driver.execute_script(
-            "arguments[0].scrollIntoView(true); arguments[0].value = arguments[1];", element, value
-        )
-        change = self.wait_for_change(f"🔧 2/2 Action: type_action | Next Step: {next_step}")
-        return f"Result: \n{change}, Next Step: {next_step}"
+        logger.info(f"🔧 1/2 Action: type_action | Id: {element_id} | Value: {value}\n")
+        try:
+            element = self.driver.find_element(By.ID, element_id)
+            self.driver.execute_script(
+                "arguments[0].scrollIntoView(true); arguments[0].value = arguments[1];", element, value
+            )
+            change = self.wait_for_change(f"🔧 2/2 Action: type_action | Next Step: {next_step}\n")
+            return f"Result: \n{change}, Next Step: {next_step}"
+        except Exception as e:
+            logger.error(f"🔧 2/2 Action: type_action | Error: {e}\n")
+            return f"Result: Error typing into element {element_id}: {e}"
 
     def wait_for_change(self, log: str = None, counter=0) -> str:
         """
@@ -219,6 +226,6 @@ class WebDriver:
         Closes the website & WebDriver.
         This function is called when the agent is done.
         """
-        logger.info("🔧 Action: close | Closing driver...")
+        logger.info("🔧 Action: close | Closing driver...\n")
         self.driver.quit()
         return "Web driver is cloed!, No further actions can be taken until the user's next message"
