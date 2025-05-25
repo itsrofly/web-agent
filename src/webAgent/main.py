@@ -3,7 +3,6 @@ import os
 import streamlit as st
 
 from webAgent import Agent, WebDriver
-from this import d
 
 agent = Agent(api_key=os.getenv("API_KEY"), base_url=os.getenv("BASE_URL"))
 
@@ -30,6 +29,7 @@ executable_path_input = st.sidebar.text_input(
     "Driver Executable Path (optional):", key="executable_path", placeholder="/path/to/your/geckodriver_or_chromedriver"
 )
 
+
 def handle_close() -> str:
     """
     Closes the website & WebDriver.
@@ -38,6 +38,7 @@ def handle_close() -> str:
     if "web" in st.session_state:
         st.session_state.web.close()
         del st.session_state["web"]
+
 
 if prompt := st.chat_input("What is up?"):
     with st.spinner("Wait for it...", show_time=True):
