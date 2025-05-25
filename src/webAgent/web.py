@@ -1,7 +1,11 @@
 from bs4 import BeautifulSoup
+from loguru import logger
 from markdownify import markdownify
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
+
 
 class WebDriver:
     def __init__(self):
@@ -10,6 +14,7 @@ class WebDriver:
         """
         self.options = Options()
         self.driver = webdriver.Remote(options=self.options, command_executor="http://localhost:4444")
+        self.latest_source = self.driver.page_source
 
     def __clean_html(self, html: str) -> str:
         """
@@ -21,14 +26,16 @@ class WebDriver:
         soup = BeautifulSoup(html, "html.parser")
 
         # Remove hidden elements
-        for tag in list(soup.find_all(
-            lambda tag: (
-                tag.has_attr("hidden") or
-                tag.get("type", "").lower() == "hidden" or
-                "display:none" in "".join(tag.get("style", "").lower().split()) or
-                "visibility:hidden" in "".join(tag.get("style", "").lower().split())
+        for tag in list(
+            soup.find_all(
+                lambda tag: (
+                    tag.has_attr("hidden")
+                    or tag.get("type", "").lower() == "hidden"
+                    or "display:none" in "".join(tag.get("style", "").lower().split())
+                    or "visibility:hidden" in "".join(tag.get("style", "").lower().split())
+                )
             )
-        )):
+        ):
             tag.decompose()
 
         # Get all interactive elements in html only
@@ -46,8 +53,6 @@ class WebDriver:
         # Convert to markdown
         md = markdownify(soup.body.prettify())
         result = md + interactive_md
-        print(result)
-        exit(1)
         return result
 
     def __generate_ids(self):
@@ -64,41 +69,65 @@ class WebDriver:
             """
         )
 
-    def open_website(self, url) -> str:
+    def open_website(self, url: str, next_step: str) -> str:
         """
         Open only the base URL (no path or query parameters).
         If the URL is unknown, use https://google.com to search for the page.
 
-        :param url: The Base URL, e.g. https://google.com
-        :return: The full content of the page converted to Markdown,
-                 including a section at the end listing all interactive elements
-                 (buttons, inputs, links, etc.) with their attributes and inner HTML.
+         Args:
+            url: The target base URL (e.g., "https://google.com")
+            next_step: A descriptive string for the next step and expected outcome.
+
+         Returns:
+            The updated source of the page after the
+            action and subsequent changes have completed + next_step
         """
+
         self.driver.get(url)
-        self.__generate_ids()
-        source = self.driver.page_source
-        self.latest_source = source
-        self.latest_url = self.driver.current_url
-        response = f"Current Website: {self.latest_url}\n Source:  {self.__clean_html(self.latest_source)}"
-        return response
+        logger.info("🔧 1/2 Action: open_website")
+        change = self.wait_for_change(f"🔧 2/2 Action: open_website | Next Step: {next_step}")
+        return f"Result: \n{change}, Next Step: {next_step}"
 
-    def execute_action(self, script: str) -> str:
+    def click_action(self, element_id: str, next_step: str) -> str:
         """
-        Execute JavaScript on the page with strict element interaction rules:
-        - Use only element IDs to interact with elements (click, fill forms, etc.).
-          Other selectors (querySelector, classes, tags, attributes, type, etc.) are not allowed.
-        - Always target the site’s search bar by its element ID only.
-          Do not rely on generic selectors or assumptions.
-        - Use defensive code: always check if elements with given IDs exist before interacting,
-          and handle cases where elements are missing or inaccessible.
+        Clicks an element identified by its ID.
 
-        :param script: The JavaScript code to execute. Raw, no escapes or formatting, no break lines. Just clean, ready-to-run JavaScript.
-        :return: The Markdown page after executing the script.
+        Args:
+            element_id: The ID of the HTML element to click.
+            next_step: A descriptive string for the next step and expected outcome.
+
+        Returns:
+            The updated source of the page after the
+            action and subsequent changes have completed + next_step
         """
-        self.driver.execute_script(script)
-        return self.wait_for_change()
 
-    def wait_for_change(self) -> str:
+        element = self.driver.find_element(By.ID, element_id)
+        ActionChains(self.driver).move_to_element(element).click().perform()
+        logger.info("🔧 1/2 Action: click_action")
+        change = self.wait_for_change(f"🔧 2/2 Action: click_action | Next Step: {next_step}")
+        return f"Result: \n{change}, Next Step: {next_step}"
+
+    def type_action(self, element_id: str, value: str, next_step: str) -> str:
+        """
+        Insert a given value into an element identified by its ID.
+
+        Args:
+            element_id: The ID of the HTML element to type into.
+            value: The string value to be inserted into the element.
+            next_step: A descriptive string for the next step and expected outcome.
+
+        Returns:
+            The updated source of the page after the
+            action and subsequent changes have completed + next_step
+        """
+
+        element = self.driver.find_element(By.ID, element_id)
+        ActionChains(self.driver).move_to_element(element).send_keys(value).perform()
+        logger.info("🔧 1/2 Action: type_action")
+        change = self.wait_for_change(f"🔧 2/2 Action: type_action | Next Step: {next_step}")
+        return f"Result: \n{change}, Next Step: {next_step}"
+
+    def wait_for_change(self, log: str = None) -> str:
         """
         Wait for source to change.
 
@@ -109,10 +138,13 @@ class WebDriver:
             self.driver.implicitly_wait(3)
             return self.wait_for_change()
         else:
+            if log:
+                logger.info(log)
+
             self.__generate_ids()
             self.latest_source = self.driver.page_source
             self.latest_url = self.driver.current_url
-            response = f"Current Website: {self.latest_url}\n Source:  {self.__clean_html(self.latest_source)}"
+            response = f"Current Website: {self.latest_url}\nSource: {self.__clean_html(self.latest_source)}"
             return response
 
     def close(self):
@@ -120,4 +152,5 @@ class WebDriver:
         Closes the website & WebDriver.
         This function is called when the agent is done.
         """
+        logger.info("🔧 Action: close | Closing driver...")
         self.driver.quit()

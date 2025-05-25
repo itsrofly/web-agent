@@ -3,7 +3,6 @@ import json
 import re
 from typing import Callable, Dict, Generator, List, Literal, get_args, get_origin
 
-from loguru import logger
 from openai import OpenAI
 
 
@@ -68,13 +67,14 @@ class Agent:
                 }
                 for name, tool in self._tools.items()
             ],
-            tool_choice='auto',
+            tool_choice="auto",
             temperature=0.5,
             stream=True,
         )
 
         final_tool_calls = {}
         for chunk in stream:
+            chunk.choices[0]
             # Check if the chunk contains a tool call
             if chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
@@ -91,13 +91,10 @@ class Agent:
         for index, tool_call in final_tool_calls.items():
             # Call the function with the arguments
             tool = self._tools[tool_call.function.name]
-            print(tool_call.function.arguments)
             args = json.loads(tool_call.function.arguments)
             result = tool["function"](**args)
-
-            called = f"Tool Call: {tool_call.function.name}({args})\nResult: %%{result}%%"
-            logger.info(f"{tool_call.function.name}({args})")
-            system_prompts.append(called)
+            messages.append({"role": "assistant", "content": [], "tool_calls": [tool_call]})
+            messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": str(result)})
             # Send the result back to the model
             for result in self.send(
                 model=model,
