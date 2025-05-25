@@ -11,12 +11,14 @@ from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.edge.service import Service as EdgeService
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.safari.options import Options as SafariOptions
+from selenium.webdriver.safari.service import Service as SafariService
 
 
 class WebDriver:
     def __init__(
         self,
-        browser_name: Literal["Remote", "Firefox", "Chrome", "Edge"] = "Firefox",
+        browser_name: Literal["Remote", "Firefox", "Chrome", "Edge", "Safari"] = "Firefox",
         command_executor: str = "http://localhost:4444",
         headless: bool = False,
         executable_path: str = None,
@@ -32,7 +34,7 @@ class WebDriver:
         Args:
             browser_name: The name of the browser to use.
                 Defaults to "Firefox".
-                Supported values: "Remote", "Firefox", "Chrome", "Edge".
+                Supported values: "Remote", "Firefox", "Chrome", "Edge", "Safari".
             command_executor: The URL of the Selenium Grid hub or standalone server
                 if `browser_name` is "Remote". Defaults to "http://localhost:4444".
             headless: If True, the browser will run in headless mode (no GUI).
@@ -63,11 +65,15 @@ class WebDriver:
                 options.add_argument("--headless")
             service = EdgeService(executable_path=executable_path) if executable_path else None
             self.driver = webdriver.Edge(options=options, service=service)
+        elif browser_name == "Safari":
+            options = SafariOptions()
+            service = SafariService(executable_path=executable_path) if executable_path else None
+            self.driver = webdriver.Safari(options=options, service=service)
         elif browser_name == "Remote":
             options = FirefoxOptions()
             self.driver = webdriver.Remote(command_executor=command_executor, options=options)
         else:
-            raise ValueError(f"Unsupported browser: {browser_name}. Choose from 'Firefox', 'Chrome', 'Edge', 'Remote'.")
+            raise ValueError(f"Unsupported browser: {browser_name}. Choose from 'Firefox', 'Chrome', 'Edge', 'Safari', 'Remote'.")
         if self.driver:
             self.latest_source = self.driver.page_source
         else:

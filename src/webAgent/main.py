@@ -19,7 +19,7 @@ for message in st.session_state.messages:
 
 # I want to receive news from blog.google, subscribe, my email is rofly@gmail.com
 
-webdriver_options = ["Firefox", "Chrome", "Edge", "Remote"]
+webdriver_options = ["Firefox", "Chrome", "Edge", "Safari", "Remote"]
 selected_webdriver = st.sidebar.selectbox("Choose your WebDriver:", webdriver_options, index=0)
 
 if "selected_webdriver" not in st.session_state or st.session_state.selected_webdriver != selected_webdriver:
@@ -29,6 +29,7 @@ executable_path_input = st.sidebar.text_input(
     "Driver Executable Path (optional):", key="executable_path", placeholder="/path/to/your/geckodriver_or_chromedriver"
 )
 
+headless_mode = st.sidebar.checkbox("Run in headless mode", key="headless_mode")
 
 def handle_close() -> str:
     """
@@ -45,6 +46,7 @@ if prompt := st.chat_input("What is up?"):
         if "web" not in st.session_state:
             st.session_state.web = WebDriver(
                 browser_name=st.session_state.selected_webdriver,
+                headless=st.session_state.headless_mode,
                 executable_path=st.session_state.executable_path if st.session_state.executable_path else None,
             )
         agent.add_tool(st.session_state.web.open_website)
