@@ -5,9 +5,9 @@ import streamlit as st
 from webAgent import Agent, WebDriver
 
 agent = Agent(
-    api_key=os.getenv("GEMINI_API_KEY"),
-    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-)  #
+    api_key=os.getenv("API_KEY"),
+    base_url=os.getenv("BASE_URL")
+)
 
 st.title("Web Agent")
 
@@ -35,6 +35,6 @@ if prompt := st.chat_input("What is up?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        agent_response = agent.send(model="gemini-2.5-pro-preview-05-06", messages=st.session_state.messages)
+        agent_response = agent.send(model=os.getenv("MODEL_NAME"), messages=st.session_state.messages)
         response = st.write_stream(agent_response)
     st.session_state.messages.append({"role": "assistant", "content": response})

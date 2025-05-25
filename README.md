@@ -7,16 +7,18 @@
 
 ## 🔧 Environment Setup
 
-To run the application, you need to create a `.env` file at the project root. This file stores sensitive credentials and configuration settings for API services, the database, and backend authentication.
+To run the application, you need to create a `.env` file at the project root. This file stores sensitive credentials and configuration settings for API services.
 
 ---
 
 ### Steps to Create and Configure the .env File
 
 1. **Create a file named `.env` in the project's root directory.**
-2. **Copy and paste the following template into the `.env` file:**
+2. **Copy and paste the following template into the `.env` file and fill in the variables:**
    ```env
-   OPENAI_API_KEY=
+    BASE_URL= # OpenAI API Compatible
+    API_KEY=
+    MODEL_NAME=gemini-2.5-pro-preview-05-06
    ```
 
 ## 📦 Project Setup
@@ -47,7 +49,14 @@ To run the application:
 docker compose up -d
 ```
 
-2. Run the Streamlit application in a separate terminal:
+2. Run the chat application:
 ```bash
 streamlit run src/webAgent/main.py
 ```
+
+3. Open Chat & WebDriver
+
+WebDriver: [http://172.18.0.2:7900/](http://172.18.0.2:7900/)
+  * Password: secret
+
+Chat: [http://localhost:8501/](http://localhost:8501/)
