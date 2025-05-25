@@ -132,7 +132,7 @@ class WebDriver:
 
          Args:
             url: The target URL (e.g., "https://google.com")
-            next_step: A descriptive string for the next step and expected outcome.
+            next_step: A descriptive string for the next step after this action.
 
          Returns:
             The updated source of the page after the
@@ -149,7 +149,7 @@ class WebDriver:
 
         Args:
             element_id: The ID of the HTML element to click.
-            next_step: A descriptive string for the next step and expected outcome.
+            next_step: A descriptive string for the next step after this action.
 
         Returns:
             The updated source of the page after the
@@ -172,7 +172,7 @@ class WebDriver:
         Args:
             element_id: The ID of the HTML element to type into.
             value: The string value to be inserted into the element.
-            next_step: A descriptive string for the next step and expected outcome.
+            next_step: A descriptive string for the next step after this action.
 
         Returns:
             The updated source of the page after the
