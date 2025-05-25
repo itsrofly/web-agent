@@ -3,11 +3,9 @@ import os
 import streamlit as st
 
 from webAgent import Agent, WebDriver
+from this import d
 
-agent = Agent(
-    api_key=os.getenv("API_KEY"),
-    base_url=os.getenv("BASE_URL")
-)
+agent = Agent(api_key=os.getenv("API_KEY"), base_url=os.getenv("BASE_URL"))
 
 st.title("Web Agent")
 
@@ -22,13 +20,36 @@ for message in st.session_state.messages:
 
 # I want to receive news from blog.google, subscribe, my email is rofly@gmail.com
 
+webdriver_options = ["Firefox", "Chrome", "Edge", "Remote"]
+selected_webdriver = st.sidebar.selectbox("Choose your WebDriver:", webdriver_options, index=0)
+
+if "selected_webdriver" not in st.session_state or st.session_state.selected_webdriver != selected_webdriver:
+    st.session_state.selected_webdriver = selected_webdriver
+
+executable_path_input = st.sidebar.text_input(
+    "Driver Executable Path (optional):", key="executable_path", placeholder="/path/to/your/geckodriver_or_chromedriver"
+)
+
+def handle_close() -> str:
+    """
+    Closes the website & WebDriver.
+    This function is called when the agent is done.
+    """
+    if "web" in st.session_state:
+        st.session_state.web.close()
+        del st.session_state["web"]
+
 if prompt := st.chat_input("What is up?"):
     with st.spinner("Wait for it...", show_time=True):
-        web = WebDriver()
-        agent.add_tool(web.open_website)
-        agent.add_tool(web.click_action)
-        agent.add_tool(web.type_action)
-        agent.add_tool(web.close)
+        if "web" not in st.session_state:
+            st.session_state.web = WebDriver(
+                browser_name=st.session_state.selected_webdriver,
+                executable_path=st.session_state.executable_path if st.session_state.executable_path else None,
+            )
+        agent.add_tool(st.session_state.web.open_website)
+        agent.add_tool(st.session_state.web.click_action)
+        agent.add_tool(st.session_state.web.type_action)
+        agent.add_tool(handle_close)
 
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):

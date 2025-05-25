@@ -1,19 +1,77 @@
+from typing import Literal
+
 from bs4 import BeautifulSoup
 from loguru import logger
 from markdownify import markdownify
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.edge.service import Service as EdgeService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
 
 
 class WebDriver:
-    def __init__(self):
+    def __init__(
+        self,
+        browser_name: Literal["Remote", "Firefox", "Chrome", "Edge"] = "Firefox",
+        command_executor: str = "http://localhost:4444",
+        headless: bool = False,
+        executable_path: str = None,
+    ):
         """
-        Initializes the WebDriver with Firefox options.
+        Manages a Selenium WebDriver instance for browser automation.
+
+        This class provides an interface to control a web browser, supporting
+        different browser types (Firefox, Chrome, Edge, and Remote via Selenium Grid).
+        It allows for actions like opening websites, clicking elements, typing into fields,
+        and retrieving page source, which is then cleaned and converted to Markdown.
+
+        Args:
+            browser_name: The name of the browser to use.
+                Defaults to "Firefox".
+                Supported values: "Remote", "Firefox", "Chrome", "Edge".
+            command_executor: The URL of the Selenium Grid hub or standalone server
+                if `browser_name` is "Remote". Defaults to "http://localhost:4444".
+            headless: If True, the browser will run in headless mode (no GUI).
+                Defaults to False.
+            executable_path: Optional path to the browser driver executable.
+                If not provided, Selenium will try to find it in the system PATH.
+                Defaults to None.
+
+        Raises:
+            ValueError: If an unsupported `browser_name` is provided.
         """
-        self.options = Options()
-        self.driver = webdriver.Remote(options=self.options, command_executor="http://localhost:4444")
-        self.latest_source = self.driver.page_source
+        self.driver = None
+        if browser_name == "Firefox":
+            options = FirefoxOptions()
+            if headless:
+                options.add_argument("--headless")
+            service = FirefoxService(executable_path=executable_path) if executable_path else None
+            self.driver = webdriver.Firefox(options=options, service=service)
+        elif browser_name == "Chrome":
+            options = ChromeOptions()
+            if headless:
+                options.add_argument("--headless")
+            service = ChromeService(executable_path=executable_path) if executable_path else None
+            self.driver = webdriver.Chrome(options=options, service=service)
+        elif browser_name == "Edge":
+            options = EdgeOptions()
+            if headless:
+                options.add_argument("--headless")
+            service = EdgeService(executable_path=executable_path) if executable_path else None
+            self.driver = webdriver.Edge(options=options, service=service)
+        elif browser_name == "Remote":
+            options = FirefoxOptions()
+            self.driver = webdriver.Remote(command_executor=command_executor, options=options)
+        else:
+            raise ValueError(f"Unsupported browser: {browser_name}. Choose from 'Firefox', 'Chrome', 'Edge', 'Remote'.")
+        if self.driver:
+            self.latest_source = self.driver.page_source
+        else:
+            self.latest_source = ""
 
     def __clean_html(self, html: str) -> str:
         """
@@ -70,11 +128,10 @@ class WebDriver:
 
     def open_website(self, url: str, next_step: str) -> str:
         """
-        Open only the base URL (no path or query parameters).
-        If the URL is unknown, use https://google.com to search for the page.
+        If the URL is unknown, use https://www.google.com/search?q={value} to search for the page.
 
          Args:
-            url: The target base URL (e.g., "https://google.com")
+            url: The target URL (e.g., "https://google.com")
             next_step: A descriptive string for the next step and expected outcome.
 
          Returns:
@@ -131,16 +188,16 @@ class WebDriver:
         change = self.wait_for_change(f"🔧 2/2 Action: type_action | Next Step: {next_step}")
         return f"Result: \n{change}, Next Step: {next_step}"
 
-    def wait_for_change(self, log: str = None) -> str:
+    def wait_for_change(self, log: str = None, counter=0) -> str:
         """
         Wait for source to change.
 
         :return: The Markdown page after the change.
         """
         last_source = self.latest_source
-        if last_source == self.driver.page_source:
+        if last_source == self.driver.page_source and counter < 3:
             self.driver.implicitly_wait(3)
-            return self.wait_for_change()
+            return self.wait_for_change(log, counter + 1)
         else:
             if log:
                 logger.success(log)

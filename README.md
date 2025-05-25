@@ -44,7 +44,7 @@ To set up the project environment, follow these steps:
 
 To run the application:
 
-1. Start the web driver using Docker Compose:
+1. Start the Remote WebDriver using Docker Compose (Recommended):
 ```bash
 docker compose up -d
 ```
@@ -56,7 +56,8 @@ streamlit run src/webAgent/main.py
 
 3. Open Chat & WebDriver
 
-WebDriver: [http://172.18.0.2:7900/](http://172.18.0.2:7900/)
+Remote WebDriver: [http://172.18.0.2:7900/](http://172.18.0.2:7900/)
   * Password: secret
 
 Chat: [http://localhost:8501/](http://localhost:8501/)
+  * Select Remote WebDriver (Recommended)

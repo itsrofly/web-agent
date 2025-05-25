@@ -32,6 +32,7 @@ class Agent:
         After completing the tasks, close WebDriver and reply to the user
         """,
         ],
+        temperature=0.1,
     ) -> Generator:
         """
         Send a prompt to the model and return the response.
@@ -68,8 +69,7 @@ class Agent:
                 }
                 for name, tool in self._tools.items()
             ],
-            tool_choice="auto",
-            temperature=0.5,
+            temperature=temperature,
             stream=True,
         )
 
