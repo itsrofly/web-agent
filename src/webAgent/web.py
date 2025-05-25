@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 from loguru import logger
 from markdownify import markdownify
 from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 
@@ -82,9 +81,8 @@ class WebDriver:
             The updated source of the page after the
             action and subsequent changes have completed + next_step
         """
-
+        logger.info(f"🔧 1/2 Action: open_website | Url: {url}")
         self.driver.get(url)
-        logger.info("🔧 1/2 Action: open_website")
         change = self.wait_for_change(f"🔧 2/2 Action: open_website | Next Step: {next_step}")
         return f"Result: \n{change}, Next Step: {next_step}"
 
@@ -101,9 +99,12 @@ class WebDriver:
             action and subsequent changes have completed + next_step
         """
 
+        logger.info(f"🔧 1/2 Action: click_action | Id: {element_id}")
         element = self.driver.find_element(By.ID, element_id)
-        ActionChains(self.driver).move_to_element(element).click().perform()
-        logger.info("🔧 1/2 Action: click_action")
+        if not element:
+            return f"Result: Element id {element_id} not found!"
+        element = self.driver.find_element(By.ID, element_id)
+        self.driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", element)
         change = self.wait_for_change(f"🔧 2/2 Action: click_action | Next Step: {next_step}")
         return f"Result: \n{change}, Next Step: {next_step}"
 
@@ -120,10 +121,13 @@ class WebDriver:
             The updated source of the page after the
             action and subsequent changes have completed + next_step
         """
-
+        logger.info(f"🔧 1/2 Action: type_action | Id: {element_id} | Value: {value}")
         element = self.driver.find_element(By.ID, element_id)
-        ActionChains(self.driver).move_to_element(element).send_keys(value).perform()
-        logger.info("🔧 1/2 Action: type_action")
+        if not element:
+            return f"Result: Element id {element_id} not found!"
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView(true); arguments[0].value = arguments[1];", element, value
+        )
         change = self.wait_for_change(f"🔧 2/2 Action: type_action | Next Step: {next_step}")
         return f"Result: \n{change}, Next Step: {next_step}"
 
@@ -139,7 +143,7 @@ class WebDriver:
             return self.wait_for_change()
         else:
             if log:
-                logger.info(log)
+                logger.success(log)
 
             self.__generate_ids()
             self.latest_source = self.driver.page_source
@@ -147,10 +151,11 @@ class WebDriver:
             response = f"Current Website: {self.latest_url}\nSource: {self.__clean_html(self.latest_source)}"
             return response
 
-    def close(self):
+    def close(self) -> str:
         """
         Closes the website & WebDriver.
         This function is called when the agent is done.
         """
         logger.info("🔧 Action: close | Closing driver...")
         self.driver.quit()
+        return "Web driver is cloed!, No further actions can be taken until the user's next message"

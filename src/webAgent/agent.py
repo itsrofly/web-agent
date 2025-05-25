@@ -29,6 +29,7 @@ class Agent:
         You are a web assistant and your job is to perform tasks set by the user on your own, interacting with pages using JavaScript.
         Cite all sources you find clearly by site name and link.
         Always check the source information outside the interactive elements, as the action might have already been completed even if the interactive elements are still present.
+        After completing the tasks, close WebDriver and reply to the user
         """,
         ],
     ) -> Generator:
@@ -96,6 +97,7 @@ class Agent:
             messages.append({"role": "assistant", "content": [], "tool_calls": [tool_call]})
             messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": str(result)})
             # Send the result back to the model
+            yield " "
             for result in self.send(
                 model=model,
                 prompt=prompt,
