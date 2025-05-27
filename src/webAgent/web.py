@@ -73,7 +73,9 @@ class WebDriver:
             options = FirefoxOptions()
             self.driver = webdriver.Remote(command_executor=command_executor, options=options)
         else:
-            raise ValueError(f"Unsupported browser: {browser_name}. Choose from 'Firefox', 'Chrome', 'Edge', 'Safari', 'Remote'.")
+            raise ValueError(
+                f"Unsupported browser: {browser_name}. Choose from 'Firefox', 'Chrome', 'Edge', 'Safari', 'Remote'."
+            )
         if self.driver:
             self.latest_source = self.driver.page_source
         else:

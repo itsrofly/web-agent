@@ -12,7 +12,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 for message in st.session_state.messages:
-    if "tool_calls" in message:
+    if "tool_calls" in message or message["role"] == "tool":
         continue
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -30,6 +30,7 @@ executable_path_input = st.sidebar.text_input(
 )
 
 headless_mode = st.sidebar.checkbox("Run in headless mode", key="headless_mode")
+
 
 def handle_close() -> str:
     """
