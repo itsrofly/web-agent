@@ -1,6 +1,10 @@
 # Web Agent
 The Web Agent is a Python-based application designed to automate web interactions. It utilizes Selenium WebDriver to control a web browser and perform tasks as directed by a user through a chat interface powered by a large language model.
 
+## 🎬 Demo
+
+https://github.com/user-attachments/assets/4c3500d2-6db6-4215-a2cc-3e9fa45694c2
+
 ## 📋 Requirements
 
 - Python 3.12
