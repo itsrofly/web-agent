@@ -1,6 +1,6 @@
 # Building a Web Agent: How I Taught a Bot to Surf the Web
 
-https://github.com/user-attachments/assets/4c3500d2-6db6-4215-a2cc-3e9fa45694c2
+@[youtube](https://www.youtube.com/watch?v=gSDiZdCpBUE)
 
 In our daily lives, we constantly interact with the web. We open pages, click on buttons, and type in forms. These actions feel intuitive to us, but for a machine, they are complex tasks. I set out to build a web agent that could automate these interactions, an autonomous bot capable of navigating the digital world.
 
